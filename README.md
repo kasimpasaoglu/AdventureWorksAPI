@@ -1,0 +1,1 @@
+- Use `/swagger` endpoint for documentation
