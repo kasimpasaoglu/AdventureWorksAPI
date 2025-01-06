@@ -15,5 +15,9 @@ public class MapperProfile : Profile
         CreateMap<SubcategoryDTO, SubcategoryVM>();
         #endregion
 
+        #region Product Maplemesi
+        CreateMap<Product, ProductDTO>().ReverseMap();
+        CreateMap<ProductDTO, ProductVM>().ReverseMap();
+        #endregion
     }
 }
