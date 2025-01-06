@@ -37,7 +37,7 @@ public class CategoryController : ControllerBase
     [HttpGet("{categoryId}")]
     public IActionResult GetSubcategories(int categoryId)
     {
-        var answer = _catService.GetSubcategoriesByCategoryId(categoryId);
+        var answer = _catService.GetSubcategories(categoryId);
         if (answer != null && answer.Count > 0)
         {
             var result = _mapper.Map<List<SubcategoryVM>>(answer);

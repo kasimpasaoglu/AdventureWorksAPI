@@ -3,7 +3,7 @@ using AutoMapper;
 public interface ICategoryService
 {
     public List<CategoryDTO> GetAllCategories();
-    public List<SubcategoryDTO> GetSubcategoriesByCategoryId(int categoryId);
+    public List<SubcategoryDTO> GetSubcategories(int categoryId);
 }
 
 public class CategoryService : ICategoryService
@@ -21,7 +21,7 @@ public class CategoryService : ICategoryService
         return _mapper.Map<List<CategoryDTO>>(answer);
     }
 
-    public List<SubcategoryDTO> GetSubcategoriesByCategoryId(int categoryId)
+    public List<SubcategoryDTO> GetSubcategories(int categoryId)
     {
         var subcategories = _unitOfWork.SubCategory.Find(x => x.ProductCategoryId == categoryId).Result.ToList();
         return _mapper.Map<List<SubcategoryDTO>>(subcategories);
