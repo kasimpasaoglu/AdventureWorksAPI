@@ -13,6 +13,11 @@ public class ProductController : ControllerBase
         _mapper = mapper;
     }
 
+    /// <summary>
+    /// Returns Product List by given Filters
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <returns></returns>
     [HttpPost]
     public IActionResult Post([FromBody] ProductFilterModel filter)
     {
