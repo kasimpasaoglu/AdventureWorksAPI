@@ -1,3 +1,5 @@
+using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using AdventureWorksAPI.Models.DMO;
 using AutoMapper;
 
@@ -19,12 +21,16 @@ public class ProductService : IProductService
 
     List<ProductDTO> IProductService.GetProducts(ProductFilterModel filter)
     {
-
         var expression = ExpressionMaker.Make(filter);
 
-        var result = _unitOfWork.Product.Find(expression);
-        var resultDTO = _mapper.Map<List<ProductDTO>>(result);
-        return resultDTO;
+        // var parameters = new[] { typeof(Product), typeof(int) };
+
+        // object[]values = null;
+
+        // DynamicExpressionParser.ParseLambda<Product, bool>(parameters, typeof(bool), expression, values);
+        // var result = _unitOfWork.Product.Find(expression);
+        // var resultDTO = _mapper.Map<List<ProductDTO>>(result);
+        return null;
     }
 
 

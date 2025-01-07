@@ -1,9 +1,11 @@
 using System;
 using System.Linq.Expressions;
+using System.Reflection;
+using AdventureWorksAPI.Models.DMO;
 
 public static class ExpressionMaker
 {
-    public static Expression<Func<T, bool>> Make<T>(T model) where T : class
+    public static Expression<Func<Product, bool>> Make(ProductFilterModel model)
     {
         if (model == null)
         {
@@ -11,7 +13,7 @@ public static class ExpressionMaker
         }
 
         var props = model.GetType().GetProperties();
-        var parameter = Expression.Parameter(typeof(T), "s");
+        var parameter = Expression.Parameter(typeof(Product), "s");
         Expression result = null;
 
         foreach (var prop in props)
@@ -38,8 +40,9 @@ public static class ExpressionMaker
                 value = Convert.ChangeType(value, propertyType);
             }
 
+            var attribute = (FilterAttribute)prop.GetCustomAttributes(typeof(FilterAttribute), false).FirstOrDefault();
             // Özelliğe erişim ve sabit değer tanımlaması
-            var propAccess = Expression.Property(parameter, prop.Name);
+            var propAccess = Expression.Property(parameter, attribute.Value);
             var constant = Expression.Constant(value, prop.PropertyType);
 
             // Eşitlik ifadesini oluştur ve birleştir
@@ -52,6 +55,7 @@ public static class ExpressionMaker
             throw new InvalidOperationException("No valid properties found to create an expression.");
         }
 
-        return Expression.Lambda<Func<T, bool>>(result, parameter);
+        var expression = Expression.Lambda<Func<Product, bool>>(result, parameter);
+        return expression;
     }
 }
