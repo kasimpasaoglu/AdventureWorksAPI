@@ -22,8 +22,9 @@ public class ProductService : IProductService
 
         var expression = ExpressionMaker.Make(filter);
 
-        // var result = _unitOfWork.Product.Find(expression);
-        return null;
+        var result = _unitOfWork.Product.Find(expression);
+        var resultDTO = _mapper.Map<List<ProductDTO>>(result);
+        return resultDTO;
     }
 
 
