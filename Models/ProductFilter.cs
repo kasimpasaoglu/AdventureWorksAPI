@@ -1,6 +1,5 @@
 public class ProductFilterModel
 {
-    [FilterAttribute("ProductId")]
     public int? ProductCategoryId { get; set; }
     public int? ProductSubcategoryId { get; set; }
     public decimal? MinPrice { get; set; }

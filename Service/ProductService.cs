@@ -19,18 +19,41 @@ public class ProductService : IProductService
         _mapper = mapper;
     }
 
-    List<ProductDTO> IProductService.GetProducts(ProductFilterModel filter)
+    public List<ProductDTO> GetProducts(ProductFilterModel filter)
     {
-        var expression = ExpressionMaker.Make(filter);
+        // tablo joinleme
+        var includes = new[]
+        {
+            "ProductProductPhotos.ProductPhoto",
+            "ProductModel.ProductModelProductDescriptionCultures.ProductDescription",
+            "ProductSubcategory.ProductCategory"
+        };
 
-        // var parameters = new[] { typeof(Product), typeof(int) };
+        // expression olusturma
+        var predicate = ExpressionBuilder.BuildWhereExpression(filter);
 
-        // object[]values = null;
+        // siralama icin expression
+        var orderByExp = ExpressionBuilder.BuildOrderByExpression(filter.SortBy);
 
-        // DynamicExpressionParser.ParseLambda<Product, bool>(parameters, typeof(bool), expression, values);
-        // var result = _unitOfWork.Product.Find(expression);
-        // var resultDTO = _mapper.Map<List<ProductDTO>>(result);
-        return null;
+        // sayfalama icin expression
+        var paginationExp = ExpressionBuilder.BuildPaginationExpression(filter.PageNumber, filter.PageSize);
+
+
+        // projeksiyon olusturma 
+        Expression<Func<Product, ProductDTO>> selector = p => new ProductDTO
+        {
+            ProductId = p.ProductId,
+            Name = p.Name,
+            ListPrice = p.ListPrice,
+            StandardCost = p.StandardCost,
+            Color = p.Color,
+            ProductCategoryId = p.ProductSubcategory.ProductCategoryId,
+            ProductSubcategoryId = p.ProductSubcategoryId,
+            Description = p.ProductModel.ProductModelProductDescriptionCultures.FirstOrDefault().ProductDescription.Description,
+            LargePhoto = p.ProductProductPhotos.FirstOrDefault().ProductPhoto.LargePhoto
+        };
+
+        return _unitOfWork.Product.FindWithProjection<ProductDTO>(selector, predicate, includes, orderByExp, paginationExp).Result.ToList();
     }
 
 
