@@ -14,16 +14,10 @@ public static class ExpressionBuilder
         var parameter = Expression.Parameter(typeof(Product), "p");
         Expression combinedExp = Expression.Constant(true); // Başlangıç noktası (true)
 
-        // Her durumda çalışacak koşullar
-        var subcategoryNotNull = Expression.NotEqual(
-            Expression.Property(parameter, "ProductSubcategory"),
-            Expression.Constant(null)
-        );
+        // Allways
+        var subcategoryNotNull = Expression.NotEqual(Expression.Property(parameter, "ProductSubcategory"), Expression.Constant(null));
+        var standardCostGreaterThanZero = Expression.GreaterThan(Expression.Property(parameter, "StandardCost"), Expression.Constant(0m));
 
-        var standardCostGreaterThanZero = Expression.GreaterThan(
-            Expression.Property(parameter, "StandardCost"),
-            Expression.Constant(0m)
-        );
 
         combinedExp = Expression.AndAlso(subcategoryNotNull, standardCostGreaterThanZero);
 
@@ -79,7 +73,6 @@ public static class ExpressionBuilder
             combinedExp = Expression.AndAlso(combinedExp, colorsCondition);
         }
 
-        // Expression<Func<Product, bool>> döndür
         return Expression.Lambda<Func<Product, bool>>(combinedExp, parameter);
     }
 
@@ -113,13 +106,6 @@ public static class ExpressionBuilder
     /// <returns></returns>
     public static Func<IQueryable<Product>, IQueryable<Product>> BuildPaginationExpression(int pageNumber, int pageSize)
     {
-        // Eğer sayfalama verileri geçerli değilse tüm sorguyu döndür
-        if (pageNumber <= 0 || pageSize <= 0)
-        {
-            return query => query;
-        }
-
-        // Sayfalama işlemi
         return query => query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
     }
 
