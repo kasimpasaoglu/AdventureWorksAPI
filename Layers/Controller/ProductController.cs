@@ -29,6 +29,7 @@ public class ProductController : ControllerBase
     /// - `pageNumber` is set to `1`, indicating the first page.
     ///
     /// Example request body:
+    /// ```
     /// {
     ///   "ProductCategoryId": 1,
     ///   "ProductSubcategoryId": 2,
@@ -39,6 +40,7 @@ public class ProductController : ControllerBase
     ///   "PageSize": 10,
     ///   "PageNumber": 1
     /// }
+    /// ```
     /// </remarks>
     /// <param name="filter">Filters to apply when fetching products.</param>
     /// <returns>A filtered list of products, or no content if no products match the filters.</returns>
