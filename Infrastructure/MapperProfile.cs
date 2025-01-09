@@ -18,6 +18,9 @@ public class MapperProfile : Profile
         #region Product Maplemesi
         CreateMap<Product, ProductDTO>().ReverseMap();
         CreateMap<ProductDTO, ProductVM>().ReverseMap();
+
+        CreateMap<Product, DetailedProductDTO>().ReverseMap();
+        CreateMap<DetailedProductDTO, DetailedProductVM>().ReverseMap();
         #endregion
     }
 }

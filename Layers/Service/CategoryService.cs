@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+using AdventureWorksAPI.Models.DMO;
 using AutoMapper;
 
 public interface ICategoryService
@@ -23,7 +25,11 @@ public class CategoryService : ICategoryService
 
     public List<SubcategoryDTO> GetSubcategories(int categoryId)
     {
-        var subcategories = _unitOfWork.SubCategory.Find(x => x.ProductCategoryId == categoryId).Result.ToList();
+        var subcategories = _unitOfWork.SubCategory
+            .Find<ProductSubcategory>(x => x.ProductCategoryId == categoryId)
+            .Result
+            .ToList();
+
         return _mapper.Map<List<SubcategoryDTO>>(subcategories);
     }
 }

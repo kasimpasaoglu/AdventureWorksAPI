@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using AdventureWorksAPI.Models.DMO;
 
-public static class ExpressionBuilder
+public static class ExpressionHelper
 {
     /// <summary>
     /// Builds where section of querry
@@ -11,14 +11,12 @@ public static class ExpressionBuilder
     public static Expression<Func<Product, bool>> BuildWhereExpression(ProductFilterModel filter)
     {
         var parameter = Expression.Parameter(typeof(Product), "p");
-        Expression combinedExp = Expression.Constant(true); // Başlangıç noktası (true)
 
         // Allways
         var subcategoryNotNull = Expression.NotEqual(Expression.Property(parameter, "ProductSubcategory"), Expression.Constant(null));
         var standardCostGreaterThanZero = Expression.GreaterThan(Expression.Property(parameter, "StandardCost"), Expression.Constant(0m));
 
-
-        combinedExp = Expression.AndAlso(subcategoryNotNull, standardCostGreaterThanZero);
+        Expression combinedExp = Expression.AndAlso(subcategoryNotNull, standardCostGreaterThanZero);
 
         // ProductCategoryId
         if (filter.ProductCategoryId.HasValue)
@@ -106,6 +104,23 @@ public static class ExpressionBuilder
     public static Func<IQueryable<Product>, IQueryable<Product>> BuildPaginationExpression(int pageNumber, int pageSize)
     {
         return query => query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+    }
+
+    public static Expression<Func<T, bool>> CombineExpressions<T>(params Expression<Func<T, bool>>[] expressions)
+    {
+        if (expressions == null || expressions.Length == 0)
+            throw new ArgumentException("At least one expression is required");
+
+        var parameter = Expression.Parameter(typeof(T), "x");
+
+        Expression combinedBody = null;
+        foreach (var exp in expressions)
+        {
+            var body = Expression.Invoke(exp, parameter); // Invoke the original expression
+            combinedBody = combinedBody == null ? body : Expression.AndAlso(combinedBody, body); // Combine with AndAlso
+        }
+
+        return Expression.Lambda<Func<T, bool>>(combinedBody, parameter);
     }
 
 }

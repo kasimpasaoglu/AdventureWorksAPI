@@ -64,4 +64,35 @@ public class ProductController : ControllerBase
         return NoContent();
     }
 
+
+    /// <summary>
+    /// Retrieves a single product by its unique identifier.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint fetches the details of a product based on the provided product ID. 
+    /// The response contains information such as product name, price, category, and other details.
+    /// 
+    /// Example request:
+    /// ```
+    /// GET /api/product/755
+    /// ```
+    /// </remarks>
+    /// <param name="id">The unique identifier of the product to retrieve.</param>
+    /// <returns>The product details, or no content if the product is not found.</returns>
+    /// <response code="200">Returns the details of the product.</response>
+    /// <response code="204">No product found with the given ID.</response>
+    /// <response code="400">If the provided ID is invalid.</response>
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DetailedProductVM))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public IActionResult Get(int id)
+    {
+        var answer = _service.GetSingleProduct(id);
+        if (answer != null)
+        {
+            return Ok(_mapper.Map<DetailedProductVM>(answer));
+        }
+        return NoContent();
+    }
 }

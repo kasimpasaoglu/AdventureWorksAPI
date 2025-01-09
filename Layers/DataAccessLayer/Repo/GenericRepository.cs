@@ -6,7 +6,16 @@ using Microsoft.EntityFrameworkCore;
 public interface IGenericRepository<T> where T : class
 {
     Task<List<T>> GetAll();
-    Task<IEnumerable<T>> Find(Expression<Func<T, bool>> predicate);
+    Task<IEnumerable<TResult>> Find<TResult>(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, TResult>> selector = null,
+        bool distinct = false);
+    Task<TResult> FindSingle<TResult>
+    (
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, TResult>> selector,
+        string[] includeProperties
+    );
     Task<List<TResult>> FindWithProjection<TResult>
     (
         Expression<Func<T, TResult>> selector,
@@ -28,9 +37,35 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _dbSet = _context.Set<T>();
     }
 
-    public async Task<IEnumerable<T>> Find(Expression<Func<T, bool>> predicate)
+    public async Task<IEnumerable<TResult>> Find<TResult>(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, TResult>> selector = null,
+        bool distinct = false)
     {
-        return await _dbSet.Where(predicate).ToListAsync();
+        if (selector != null)
+        {
+            return await _dbSet.Where(predicate).Select(selector).ToListAsync();
+        }
+
+        // Selector yoksa T türünde dönüşüm yap
+        return await _dbSet.Where(predicate).ToListAsync() as IEnumerable<TResult>;
+    }
+
+    public async Task<TResult> FindSingle<TResult>
+    (
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, TResult>> selector,
+        string[] includeProperties
+    )
+    {
+        IQueryable<T> query = _dbSet;
+
+        foreach (var includeProperty in includeProperties)
+        {
+            query = query.Include(includeProperty);
+        }
+
+        return await query.Where(predicate).Select(selector).FirstOrDefaultAsync();
     }
 
     public async Task<List<TResult>> FindWithProjection<TResult>

@@ -6,7 +6,7 @@ using AutoMapper;
 public interface IProductService
 {
     public List<ProductDTO> GetProducts(ProductFilterModel filter);
-    public ProductDTO GetSingleProduct(int productId);
+    public DetailedProductDTO GetSingleProduct(int productId);
 }
 
 public class ProductService : IProductService
@@ -22,43 +22,38 @@ public class ProductService : IProductService
     public List<ProductDTO> GetProducts(ProductFilterModel filter)
     {
         // tablo joinleme
-        var includes = new[]
-        {
-            "ProductProductPhotos.ProductPhoto",
-            "ProductModel.ProductModelProductDescriptionCultures.ProductDescription",
-            "ProductSubcategory.ProductCategory"
-        };
+        var includes = Constants.GetSimpleIncludes();
 
-        // expression olusturma
-        var predicate = ExpressionBuilder.BuildWhereExpression(filter);
+        // where kosullari expression olusturma
+        var predicate = ExpressionHelper.BuildWhereExpression(filter);
 
-        // siralama icin expression
-        var orderByExp = ExpressionBuilder.BuildOrderByExpression(filter.SortBy);
+        // siralama icin orderby expression
+        var orderByExp = ExpressionHelper.BuildOrderByExpression(filter.SortBy);
 
-        // sayfalama icin expression
-        var paginationExp = ExpressionBuilder.BuildPaginationExpression(filter.PageNumber, filter.PageSize);
+        // sayfalama icin(Take, Skip) expression
+        var paginationExp = ExpressionHelper.BuildPaginationExpression(filter.PageNumber, filter.PageSize);
 
 
-        // projeksiyon olusturma 
-        Expression<Func<Product, ProductDTO>> selector = p => new ProductDTO
-        {
-            ProductId = p.ProductId,
-            Name = p.Name,
-            ListPrice = p.ListPrice,
-            StandardCost = p.StandardCost,
-            Color = p.Color,
-            ProductCategoryId = p.ProductSubcategory.ProductCategoryId,
-            ProductSubcategoryId = p.ProductSubcategoryId,
-            Description = p.ProductModel.ProductModelProductDescriptionCultures.FirstOrDefault().ProductDescription.Description,
-            LargePhoto = p.ProductProductPhotos.FirstOrDefault().ProductPhoto.LargePhoto
-        };
+        // projeksiyon(select) olusturma 
+        Expression<Func<Product, ProductDTO>> selector = Constants.GetSimpleSelectors();
 
         return _unitOfWork.Product.FindWithProjection<ProductDTO>(selector, predicate, includes, orderByExp, paginationExp).Result.ToList();
     }
 
-
-    public ProductDTO GetSingleProduct(int productId)
+    public DetailedProductDTO GetSingleProduct(int productId)
     {
-        throw new NotImplementedException();
+        var includes = Constants.GetDetailedIncludes();
+
+        var combinedExpression = ExpressionHelper.CombineExpressions<Product>(
+            x => x.ProductId == productId,
+            x => x.StandardCost > 0,
+            x => x.ProductSubcategoryId != null
+        );
+
+        Expression<Func<Product, DetailedProductDTO>> selector = Constants.GetDetailedSelectors();
+
+
+        return _unitOfWork.Product.FindSingle<DetailedProductDTO>(combinedExpression, selector, includes).Result;
     }
+
 }
