@@ -44,7 +44,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         if (selector != null)
         {
-            return await _dbSet.Where(predicate).Select(selector).ToListAsync();
+            return await _dbSet.Where(predicate).Select(selector).Distinct().ToListAsync();
         }
 
         // Selector yoksa T türünde dönüşüm yap

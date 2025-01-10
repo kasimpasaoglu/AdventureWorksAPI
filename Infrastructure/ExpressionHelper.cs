@@ -3,11 +3,6 @@ using AdventureWorksAPI.Models.DMO;
 
 public static class ExpressionHelper
 {
-    /// <summary>
-    /// Builds where section of querry
-    /// </summary>
-    /// <param name="filter"></param>
-    /// <returns></returns>
     public static Expression<Func<Product, bool>> BuildWhereExpression(ProductFilterModel filter)
     {
         var parameter = Expression.Parameter(typeof(Product), "p");
@@ -69,15 +64,17 @@ public static class ExpressionHelper
             );
             combinedExp = Expression.AndAlso(combinedExp, colorsCondition);
         }
+        if (!string.IsNullOrEmpty(filter.SearchString))
+        {
+            var searchProperty = Expression.Property(parameter, "Name");
+            var searchConstant = Expression.Constant(filter.SearchString);
+            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            var searchCondition = Expression.Call(searchProperty, containsMethod, searchConstant);
+            combinedExp = Expression.AndAlso(combinedExp, searchCondition);
+        }
 
         return Expression.Lambda<Func<Product, bool>>(combinedExp, parameter);
     }
-
-    /// <summary>
-    /// Builds Orderby Section of querry
-    /// </summary>
-    /// <param name="sortBy"></param>
-    /// <returns></returns>
     public static Func<IQueryable<Product>, IOrderedQueryable<Product>>? BuildOrderByExpression(string? sortBy)
     {
         if (string.IsNullOrEmpty(sortBy))
@@ -91,21 +88,15 @@ public static class ExpressionHelper
             "PriceDesc" => query => query.OrderByDescending(p => p.StandardCost),
             "NameAsc" => query => query.OrderBy(p => p.Name),
             "NameDesc" => query => query.OrderByDescending(p => p.Name),
+            "DateAsc" => query => query.OrderBy(p => p.SellStartDate),
+            "DateDesc" => query => query.OrderByDescending(p => p.SellStartDate),
             _ => null
         };
     }
-
-    /// <summary>
-    /// Builds Skip and Take Secion of querry for pagination
-    /// </summary>
-    /// <param name="pageNumber"></param>
-    /// <param name="pageSize"></param>
-    /// <returns></returns>
     public static Func<IQueryable<Product>, IQueryable<Product>> BuildPaginationExpression(int pageNumber, int pageSize)
     {
         return query => query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
     }
-
     public static Expression<Func<T, bool>> CombineExpressions<T>(params Expression<Func<T, bool>>[] expressions)
     {
         if (expressions == null || expressions.Length == 0)
@@ -122,5 +113,4 @@ public static class ExpressionHelper
 
         return Expression.Lambda<Func<T, bool>>(combinedBody, parameter);
     }
-
 }

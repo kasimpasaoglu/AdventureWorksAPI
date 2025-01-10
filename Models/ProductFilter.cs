@@ -6,6 +6,7 @@ public class ProductFilterModel
     public decimal? MaxPrice { get; set; }
     public List<string>? SelectedColors { get; set; }
     public string? SortBy { get; set; }
+    public string? SearchString { get; set; }
     public int PageSize { get; set; } = 12;
     public int PageNumber { get; set; } = 1;
 }

@@ -31,14 +31,15 @@ public class ProductController : ControllerBase
     /// Example request body:
     /// ```
     /// {
-    ///   "ProductCategoryId": 1,
-    ///   "ProductSubcategoryId": 2,
-    ///   "MinPrice": 50.00,
-    ///   "MaxPrice": 100.00,
-    ///   "SelectedColors": ["Red", "Blue"],
-    ///   "SortBy": "PriceAsc",
-    ///   "PageSize": 10,
-    ///   "PageNumber": 1
+    ///     "ProductCategoryId" : 1,
+    ///     "ProductSubCategoryId" : 2,
+    ///     "MinPrice" : 2000.0,
+    ///     "MaxPrice" : 2500.0,
+    ///     "SelectedColors" : ["Red"],
+    ///     "SortBy" : "PriceDesc",
+    ///     "searchString" : "Road",
+    ///     "PageSize" : 12,
+    ///     "PageNumber" : 1
     /// }
     /// ```
     /// </remarks>
@@ -92,6 +93,41 @@ public class ProductController : ControllerBase
         if (answer != null)
         {
             return Ok(_mapper.Map<DetailedProductVM>(answer));
+        }
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Retrieves a list of the most recent products.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint fetches a list of the most recently added products, sorted by their creation date.
+    /// 
+    /// - If the `count` parameter is provided and greater than 0, the specified number of products will be returned.
+    /// - If no `count` parameter is provided or it is 0, a default of 12 products will be returned.
+    /// 
+    /// **Examples:**
+    /// - `GET /api/products/recent` → Returns the 12 most recent products.
+    /// - `GET /api/products/recent?count=5` → Returns the 5 most recent products.
+    /// </remarks>
+    /// <param name="count">Optional. The number of recent products to return. Defaults to 12 if not specified</param>
+    /// <returns>
+    /// A list of the most recent products.
+    /// </returns>
+    /// <response code="200">Returns the list of recent products.</response>
+    /// <response code="400">If the `count` parameter is invalid.</response>
+    [HttpGet("Recent")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ProductVM>))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public IActionResult GetRecent(int count)
+    {
+        var filter = new ProductFilterModel() { SortBy = "DateAsc" };
+        _ = count > 0 ? filter.PageSize = count : filter.PageSize = 12;
+        var answer = _service.GetProducts(filter);
+        if (answer.Count() > 0)
+        {
+            return Ok(answer);
         }
         return NoContent();
     }

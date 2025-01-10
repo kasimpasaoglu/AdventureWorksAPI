@@ -11,7 +11,6 @@ public static class Constants
             "ProductSubcategory.ProductCategory"
         ];
     }
-
     public static string[] GetDetailedIncludes()
     {
         return
@@ -21,7 +20,6 @@ public static class Constants
             "ProductSubcategory.ProductCategory"
         ];
     }
-
     public static Expression<Func<Product, DetailedProductDTO>> GetDetailedSelectors()
     {
         return p => new DetailedProductDTO
@@ -31,13 +29,15 @@ public static class Constants
             ListPrice = p.ListPrice,
             StandardCost = p.StandardCost,
             Color = p.Color,
+            Class = p.Class,
+            Style = p.Style,
+            Size = p.Size,
             ProductCategoryId = p.ProductSubcategory.ProductCategoryId,
             ProductSubcategoryId = p.ProductSubcategoryId,
             Description = p.ProductModel.ProductModelProductDescriptionCultures.FirstOrDefault().ProductDescription.Description,
             LargePhoto = p.ProductProductPhotos.FirstOrDefault().ProductPhoto.LargePhoto
         };
     }
-
     public static Expression<Func<Product, ProductDTO>> GetSimpleSelectors()
     {
         return p => new ProductDTO
@@ -47,8 +47,6 @@ public static class Constants
             ListPrice = p.ListPrice,
             StandardCost = p.StandardCost,
             Color = p.Color,
-            ProductCategoryId = p.ProductSubcategory.ProductCategoryId,
-            ProductSubcategoryId = p.ProductSubcategoryId,
             LargePhoto = p.ProductProductPhotos.FirstOrDefault().ProductPhoto.LargePhoto
         };
     }

@@ -10,11 +10,9 @@ public interface IColorService
 public class ColorService : IColorService
 {
     private IUnitOfWork _unitOfWork;
-    private IMapper _mapper;
-    public ColorService(IUnitOfWork unitOfWork, IMapper mapper)
+    public ColorService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
 
