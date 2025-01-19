@@ -54,4 +54,18 @@ public class DetailedProductDTO
     public int? ProductSubcategoryId { get; set; }
     public string Description { get; set; }
     public byte[] LargePhoto { get; set; }
+
+    // public DetailedProductVM ToVm()
+    // {
+    //     var model = new DetailedProductVM()
+    //     {
+    //         ProductId = this.ProductId,
+    //         Name = this.Name
+
+
+    //     };
+
+
+    //     return model;
+    // }
 }

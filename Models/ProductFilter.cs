@@ -10,3 +10,6 @@ public class ProductFilterModel
     public int PageSize { get; set; } = 12;
     public int PageNumber { get; set; } = 1;
 }
+
+// her bir prop icin hangi expressionun kullanilmasi gerektigini bir sekilde get set metodlarina verilebiliyor olmasi lazim
+// bunu bir arastir
