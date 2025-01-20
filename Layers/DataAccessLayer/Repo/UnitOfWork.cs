@@ -13,6 +13,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<BusinessEntity> BusinessEntity { get; }
     IGenericRepository<Address> Address { get; }
     IGenericRepository<BusinessEntityAddress> BusinessEntityAddress { get; }
+    IGenericRepository<StateProvince> StateProvince { get; }
     Task<IDbContextTransaction> BeginTransactionAsync();
     Task CommitTransactionAsync();
     Task RollbackTransactionAsync();
@@ -32,6 +33,7 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<BusinessEntity> BusinessEntity { get; private set; }
     public IGenericRepository<Address> Address { get; private set; }
     public IGenericRepository<BusinessEntityAddress> BusinessEntityAddress { get; private set; }
+    public IGenericRepository<StateProvince> StateProvince { get; private set; }
 
     public UnitOfWork(AdventureWorksContext context)
     {
@@ -45,6 +47,7 @@ public class UnitOfWork : IUnitOfWork
         BusinessEntity = new GenericRepository<BusinessEntity>(_context);
         Address = new GenericRepository<Address>(_context);
         BusinessEntityAddress = new GenericRepository<BusinessEntityAddress>(_context);
+        StateProvince = new GenericRepository<StateProvince>(_context);
     }
 
     public async Task<IDbContextTransaction> BeginTransactionAsync()

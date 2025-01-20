@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly IRegisterService _registerService;
+    private readonly IUserService _userService;
     private readonly IMapper _mapper;
-    public UserController(IRegisterService registerService, IMapper mapper)
+    public UserController(IUserService userService, IMapper mapper)
     {
-        _registerService = registerService;
+        _userService = userService;
         _mapper = mapper;
     }
 
@@ -39,7 +39,7 @@ public class UserController : ControllerBase
         var dto = _mapper.Map<RegisterDTO>(model);
         try
         {
-            await _registerService.RegisterUserAsync(dto);
+            await _userService.RegisterUserAsync(dto);
             return Ok(new { Message = "User Registered Succesfully" });
         }
         catch (InvalidOperationException ex)
@@ -52,4 +52,38 @@ public class UserController : ControllerBase
         }
 
     }
+
+    /// <summary>
+    /// Retrieves a list of all states (StateProvince) with their IDs and names.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint fetches all states from the database and returns their unique identifiers (StateProvinceId) and names. 
+    /// The data is primarily used for populating dropdowns or selection fields in the user registration process.
+    /// 
+    /// Example request:
+    ///
+    /// </remarks>
+    /// <returns>
+    /// Returns a list of states in a `StateVM` format if any exist. 
+    /// If no states are found, returns a 404 Not Found response.
+    /// </returns>
+    /// <response code="200">Returns the list of states with their IDs and names.</response>
+    /// <response code="404">No states found in the database.</response>
+    [HttpGet("States")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<StateVM>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Get()
+    {
+        var dtoList = _userService.GetAllStates();
+        if (dtoList.Count > 0)
+        {
+            return Ok(_mapper.Map<List<StateVM>>(dtoList));
+        }
+        else
+        {
+            return NotFound();
+        }
+    }
+
+
 }

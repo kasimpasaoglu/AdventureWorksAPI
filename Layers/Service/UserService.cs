@@ -1,15 +1,16 @@
 using AdventureWorksAPI.Models.DMO;
 using AutoMapper;
 
-public interface IRegisterService
+public interface IUserService
 {
     Task RegisterUserAsync(RegisterDTO dto);
+    List<StateDTO> GetAllStates();
 }
 
-public class RegisterService : IRegisterService
+public class UserService : IUserService
 {
     private readonly IUnitOfWork _unitOfWork;
-    public RegisterService(IUnitOfWork unitOfWork)
+    public UserService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
 
@@ -46,7 +47,6 @@ public class RegisterService : IRegisterService
             };
             await _unitOfWork.Person.AddAsync(person);
             #endregion
-
 
             #region EmailAddress
             var email = new EmailAddress
@@ -119,7 +119,18 @@ public class RegisterService : IRegisterService
 
     }
 
+    public List<StateDTO> GetAllStates()
+    {
 
+        return _unitOfWork.StateProvince.Find(
+            predicate: x => true,
+            selector: x => new StateDTO
+            {
+                StateProvinceId = x.StateProvinceId,
+                Name = x.Name
+            }
+        ).Result.ToList();
+    }
 
 
     private string GenerateSalt()

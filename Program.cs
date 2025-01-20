@@ -16,7 +16,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IColorService, ColorService>();
-builder.Services.AddScoped<IRegisterService, RegisterService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 
 builder.Services.AddSwaggerGen(options =>
