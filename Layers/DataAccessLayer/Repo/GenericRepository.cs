@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 public interface IGenericRepository<T> where T : class
 {
-    Task<List<T>> GetAll();
     Task<IEnumerable<TResult>> Find<TResult>(
         Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector = null,
@@ -24,6 +23,10 @@ public interface IGenericRepository<T> where T : class
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         Func<IQueryable<T>, IQueryable<T>>? pagination = null
     );
+    Task<List<T>> GetAll();
+    Task<T> AddAsync(T entity);
+    Task RemoveAsync(T entity);
+    Task UpdateAsync(T entity);
 }
 ////
 
@@ -115,6 +118,26 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         return await _dbSet.ToListAsync();
     }
+
+    public async Task<T> AddAsync(T entity)
+    {
+        await _dbSet.AddAsync(entity);
+        return entity;
+    }
+
+    public async Task RemoveAsync(T entity)
+    {
+        _dbSet.Remove(entity);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(T entity)
+    {
+        _dbSet.Update(entity);
+        await _context.SaveChangesAsync();
+    }
+
+
 
 
 }

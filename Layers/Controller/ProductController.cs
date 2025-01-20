@@ -28,20 +28,6 @@ public class ProductController : ControllerBase
     /// - `pageSize` is set to `12`, indicating 12 products per page.
     /// - `pageNumber` is set to `1`, indicating the first page.
     ///
-    /// Example request body:
-    /// ```
-    /// {
-    ///     "ProductCategoryId" : 1,
-    ///     "ProductSubCategoryId" : 2,
-    ///     "MinPrice" : 2000.0,
-    ///     "MaxPrice" : 2500.0,
-    ///     "SelectedColors" : ["Red"],
-    ///     "SortBy" : "PriceDesc",
-    ///     "searchString" : "Road",
-    ///     "PageSize" : 12,
-    ///     "PageNumber" : 1
-    /// }
-    /// ```
     /// </remarks>
     /// <param name="filter">Filters to apply when fetching products.</param>
     /// <returns>A filtered list of products, or no content if no products match the filters.</returns>

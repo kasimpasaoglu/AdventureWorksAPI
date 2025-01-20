@@ -22,5 +22,9 @@ public class MapperProfile : Profile
         CreateMap<Product, DetailedProductDTO>().ReverseMap();
         CreateMap<DetailedProductDTO, DetailedProductVM>().ReverseMap();
         #endregion
+
+        #region Register Maplemesi
+        CreateMap<RegisterDTO, RegisterVM>().ReverseMap();
+        #endregion
     }
 }
