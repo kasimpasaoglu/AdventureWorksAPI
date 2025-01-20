@@ -13,7 +13,7 @@ public interface IGenericRepository<T> where T : class
     (
         Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector,
-        string[] includeProperties
+        string[] includeProperties = null
     );
     Task<List<TResult>> FindWithProjection<TResult>
     (
@@ -58,14 +58,16 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     (
         Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector,
-        string[] includeProperties
+        string[] includeProperties = null
     )
     {
         IQueryable<T> query = _dbSet;
-
-        foreach (var includeProperty in includeProperties)
+        if (includeProperties != null && includeProperties.Length > 0)
         {
-            query = query.Include(includeProperty);
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
+            }
         }
 
         return await query.Where(predicate).Select(selector).FirstOrDefaultAsync();
