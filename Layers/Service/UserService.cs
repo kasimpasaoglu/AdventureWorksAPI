@@ -5,6 +5,7 @@ public interface IUserService
 {
     Task RegisterUserAsync(RegisterDTO dto);
     List<StateDTO> GetAllStates();
+    List<AddressTypeDTO> GetAddressTypes();
 }
 
 public class UserService : IUserService
@@ -132,7 +133,17 @@ public class UserService : IUserService
         ).Result.ToList();
     }
 
-
+    public List<AddressTypeDTO> GetAddressTypes()
+    {
+        return _unitOfWork.AddressType.Find(
+            predicate: x => true,
+            selector: x => new AddressTypeDTO
+            {
+                AddressTypeId = x.AddressTypeId,
+                Name = x.Name
+            }
+        ).Result.ToList();
+    }
     private string GenerateSalt()
     {
         var rng = new System.Security.Cryptography.RNGCryptoServiceProvider();

@@ -72,12 +72,42 @@ public class UserController : ControllerBase
     [HttpGet("States")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<StateVM>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult Get()
+    public IActionResult GetStates()
     {
         var dtoList = _userService.GetAllStates();
         if (dtoList.Count > 0)
         {
             return Ok(_mapper.Map<List<StateVM>>(dtoList));
+        }
+        else
+        {
+            return NotFound();
+        }
+    }
+
+    /// <summary>
+    /// Retrieves a list of all address types with their IDs and names.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint fetches all address types from the database and returns their unique identifiers (`AddressTypeId`) and names. 
+    /// The data is used for populating dropdowns or selection fields during user registration, allowing the user to select the type of address (e.g., Home, Billing, Shipping).
+    /// 
+    /// </remarks>
+    /// <returns>
+    /// Returns a list of address types in `AddressTypeVM` format if any exist. 
+    /// If no address types are found, returns a 404 Not Found response.
+    /// </returns>
+    /// <response code="200">Returns the list of address types with their IDs and names.</response>
+    /// <response code="404">No address types found in the database.</response>
+    [HttpGet("AddressTypes")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AddressTypeVM>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult GetAddressTypes()
+    {
+        var dtoList = _userService.GetAddressTypes();
+        if (dtoList.Count > 0)
+        {
+            return Ok(_mapper.Map<List<AddressTypeVM>>(dtoList));
         }
         else
         {

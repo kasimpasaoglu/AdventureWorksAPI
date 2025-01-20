@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 public interface IUnitOfWork : IDisposable
 {
+    #region Tablolar
     IGenericRepository<Product> Product { get; }
     IGenericRepository<ProductCategory> Category { get; }
     IGenericRepository<ProductSubcategory> SubCategory { get; }
@@ -14,16 +15,24 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<Address> Address { get; }
     IGenericRepository<BusinessEntityAddress> BusinessEntityAddress { get; }
     IGenericRepository<StateProvince> StateProvince { get; }
+
+    IGenericRepository<AddressType> AddressType { get; }
+    #endregion
+
+    #region Metodlar
     Task<IDbContextTransaction> BeginTransactionAsync();
     Task CommitTransactionAsync();
     Task RollbackTransactionAsync();
     Task SaveChangesAsync();
+    #endregion
 }
 
 public class UnitOfWork : IUnitOfWork
 {
+    // DataBase
     private AdventureWorksContext _context;
 
+    #region Tablolar
     public IGenericRepository<Product> Product { get; private set; }
     public IGenericRepository<ProductCategory> Category { get; private set; }
     public IGenericRepository<ProductSubcategory> SubCategory { get; private set; }
@@ -34,7 +43,11 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<Address> Address { get; private set; }
     public IGenericRepository<BusinessEntityAddress> BusinessEntityAddress { get; private set; }
     public IGenericRepository<StateProvince> StateProvince { get; private set; }
+    public IGenericRepository<AddressType> AddressType { get; private set; }
 
+    #endregion
+
+    #region  CTOR
     public UnitOfWork(AdventureWorksContext context)
     {
         _context = context;
@@ -48,8 +61,11 @@ public class UnitOfWork : IUnitOfWork
         Address = new GenericRepository<Address>(_context);
         BusinessEntityAddress = new GenericRepository<BusinessEntityAddress>(_context);
         StateProvince = new GenericRepository<StateProvince>(_context);
+        AddressType = new GenericRepository<AddressType>(_context);
     }
+    #endregion
 
+    #region Metodlar
     public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
         return await _context.Database.BeginTransactionAsync();
@@ -82,4 +98,5 @@ public class UnitOfWork : IUnitOfWork
     {
         _context.Dispose();
     }
+    #endregion
 }

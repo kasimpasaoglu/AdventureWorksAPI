@@ -26,6 +26,7 @@ public class MapperProfile : Profile
         #region User Controller maplemeleri
         CreateMap<RegisterDTO, RegisterVM>().ReverseMap();
         CreateMap<StateDTO, StateVM>().ReverseMap();
+        CreateMap<AddressTypeDTO, AddressTypeVM>().ReverseMap();
         #endregion
 
 
