@@ -50,4 +50,22 @@ public static class Constants
             LargePhoto = p.ProductProductPhotos.FirstOrDefault().ProductPhoto.LargePhoto
         };
     }
+
+    public static Expression<Func<ShoppingCartItem, ShoppingCartDTO.ItemDTO>> GetShoppingCartSelectors()
+    {
+        return cartItem => new ShoppingCartDTO.ItemDTO
+        {
+            TransactionId = cartItem.TransactionId,
+            ProductId = cartItem.ProductId,
+            ProductName = cartItem.Product.Name,
+            LargePhoto = cartItem.Product.ProductProductPhotos
+                          .Where(photo => photo.ProductPhoto != null)
+                          .Select(photo => photo.ProductPhoto.LargePhoto)
+                          .FirstOrDefault(),
+            Quantity = cartItem.Quantity,
+            ListPrice = cartItem.Product.ListPrice,
+            DateCreated = cartItem.DateCreated,
+            ModifiedDate = cartItem.ModifiedDate
+        };
+    }
 }

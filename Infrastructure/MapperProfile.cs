@@ -30,6 +30,10 @@ public class MapperProfile : Profile
         CreateMap<UpdateUserDTO, UpdateUserVM>().ReverseMap();
         #endregion
 
+        #region Cart Maplemeleri
+        CreateMap<ShoppingCartDTO, ShoppingCartVM>().ReverseMap();
+        CreateMap<ShoppingCartDTO.ItemDTO, ShoppingCartVM.ItemVM>().ReverseMap();
+        #endregion
 
     }
 }
