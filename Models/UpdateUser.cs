@@ -7,7 +7,6 @@ public class UpdateUserDTO
     public string? LastName { get; set; } = null;
     public string? EmailAddress1 { get; set; } = null;
     public string? Password { get; set; } = null;
-    public string? PasswordSalt { get; set; } = null;
     public int? EmailPromotion { get; set; } = null;
     public int? AddressTypeId { get; set; } = null;
     public string? AddressLine1 { get; set; } = null;
@@ -26,7 +25,6 @@ public class UpdateUserVM
     public string? LastName { get; set; } = null;
     public string? EmailAddress1 { get; set; } = null;
     public string? Password { get; set; } = null;
-    public string? PasswordSalt { get; set; } = null;
     public int? EmailPromotion { get; set; } = null;
     public int? AddressTypeId { get; set; } = null;
     public string? AddressLine1 { get; set; } = null;

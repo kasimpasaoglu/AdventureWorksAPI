@@ -353,8 +353,8 @@ public class UserService : IUserService
                     var salt = EncryptHelper.GenerateSalt();
                     var hashedPassword = EncryptHelper.HashPassword(dto.Password, salt);
 
-                    password.PasswordHash = hashedPassword;
                     password.PasswordSalt = salt;
+                    password.PasswordHash = hashedPassword;
                     await _unitOfWork.Password.UpdateAsync(password);
                 }
             }
