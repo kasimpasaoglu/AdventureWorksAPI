@@ -1,5 +1,4 @@
 using AdventureWorksAPI.Models.DMO;
-using AutoMapper;
 
 public interface IUserService
 {
