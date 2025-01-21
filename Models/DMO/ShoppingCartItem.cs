@@ -9,14 +9,9 @@ namespace AdventureWorksAPI.Models.DMO;
 public partial class ShoppingCartItem
 {
     /// <summary>
-    /// Primary key for ShoppingCartItem records.
-    /// </summary>
-    public int ShoppingCartItemId { get; set; }
-
-    /// <summary>
     /// Shopping cart identification number.
     /// </summary>
-    public string ShoppingCartId { get; set; } = null!;
+    public int TransactionId { get; set; }
 
     /// <summary>
     /// Product quantity ordered.
@@ -37,6 +32,10 @@ public partial class ShoppingCartItem
     /// Date and time the record was last updated.
     /// </summary>
     public DateTime ModifiedDate { get; set; }
+
+    public int BusinessEntityId { get; set; }
+
+    public virtual BusinessEntity BusinessEntity { get; set; } = null!;
 
     public virtual Product Product { get; set; } = null!;
 }

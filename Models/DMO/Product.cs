@@ -101,7 +101,7 @@ public partial class Product
     /// <summary>
     /// Product is a member of this product subcategory. Foreign key to ProductSubCategory.ProductSubCategoryID. 
     /// </summary>
-    public int ProductSubcategoryId { get; set; }
+    public int? ProductSubcategoryId { get; set; }
 
     /// <summary>
     /// Product is a member of this product model. Foreign key to ProductModel.ProductModelID.

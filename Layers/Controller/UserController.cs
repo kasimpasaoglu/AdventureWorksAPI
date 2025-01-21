@@ -121,7 +121,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <param name="Login">The login data (email and password).</param>
     /// <returns>Returns detailed messages for each validation step.</returns>
-    [HttpPost("login")]
+    [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LoginResult))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Login([FromBody] Login login)
@@ -131,15 +131,14 @@ public class UserController : ControllerBase
         if (!result.IsSuccessful)
             return BadRequest(new { result.Message });
 
-        return Ok(new { result.Message, result.BusinessEntityId, result.Token });
+        return Ok(new { result.Message, result.Token });
     }
 
     /// <summary>
     /// Deletes a user's account based on the provided BusinessEntityId.
     /// </summary>
     /// <remarks>
-    /// This endpoint allows an authenticated user to delete their own account. 
-    /// The `BusinessEntityId` provided in the request URL must match the authenticated user's ID. 
+    /// This endpoint allows an authenticated user to delete their **own** account. 
     /// 
     /// **Authorization is required.**
     /// 
@@ -149,7 +148,6 @@ public class UserController : ControllerBase
     /// - **404 Not Found:** The provided BusinessEntityId does not exist.
     /// - **500 Internal Server Error:** An unexpected error occurred while deleting the account.
     /// </remarks>
-    /// <param name="id">The unique BusinessEntityId of the account to delete.</param>
     /// <returns>
     /// A success or error message depending on the operation result.
     /// </returns>
@@ -158,20 +156,14 @@ public class UserController : ControllerBase
     /// <response code="404">No account found with the provided BusinessEntityId.</response>
     /// <response code="500">An unexpected error occurred during account deletion.</response>
     [Authorize]
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
+    [HttpDelete]
+    public async Task<IActionResult> Delete()
     {
         try
         {
-            var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
-            var userIdClaim = claimsIdentity?.FindFirst("BusinessEntityId");
+            var businessEntityId = Token.GetBusinessEntityId(User);
 
-            if (userIdClaim == null || int.Parse(userIdClaim.Value) != id)
-            {
-                return Unauthorized(new { Error = "User can only delete owned account. Identification failed" });
-            }
-
-            var result = await _userService.DeleteUserAsync(id);
+            var result = await _userService.DeleteUserAsync(businessEntityId);
 
             if (result)
             {
@@ -212,16 +204,10 @@ public class UserController : ControllerBase
     {
         try
         {
-            var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
-            var userIdClaim = claimsIdentity?.FindFirst("BusinessEntityId");
-
-            if (userIdClaim == null || int.Parse(userIdClaim.Value) != userVM.BusinessEntityId)
-            {
-                return Unauthorized(new { Error = "User can only delete owned account. Identification failed" });
-            }
+            var businessEntityId = Token.GetBusinessEntityId(User);
 
             var dto = _mapper.Map<UpdateUserDTO>(userVM);
-            var isUpdated = await _userService.UpdateUserAsync(dto);
+            var isUpdated = await _userService.UpdateUserAsync(dto, businessEntityId);
 
             if (isUpdated)
             {

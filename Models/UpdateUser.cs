@@ -1,6 +1,5 @@
 public class UpdateUserDTO
 {
-    public int BusinessEntityId { get; set; }
     public string? Title { get; set; } = null;
     public string? FirstName { get; set; } = null;
     public string? MiddleName { get; set; } = null;
@@ -18,7 +17,6 @@ public class UpdateUserDTO
 
 public class UpdateUserVM
 {
-    public int BusinessEntityId { get; set; }
     public string? Title { get; set; } = null;
     public string? FirstName { get; set; } = null;
     public string? MiddleName { get; set; } = null;

@@ -17,6 +17,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<StateProvince> StateProvince { get; }
 
     IGenericRepository<AddressType> AddressType { get; }
+    IGenericRepository<ShoppingCartItem> ShoppingCart { get; }
     #endregion
 
     #region Metodlar
@@ -44,6 +45,7 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<BusinessEntityAddress> BusinessEntityAddress { get; private set; }
     public IGenericRepository<StateProvince> StateProvince { get; private set; }
     public IGenericRepository<AddressType> AddressType { get; private set; }
+    public IGenericRepository<ShoppingCartItem> ShoppingCart { get; private set; }
 
     #endregion
 
@@ -62,6 +64,7 @@ public class UnitOfWork : IUnitOfWork
         BusinessEntityAddress = new GenericRepository<BusinessEntityAddress>(_context);
         StateProvince = new GenericRepository<StateProvince>(_context);
         AddressType = new GenericRepository<AddressType>(_context);
+        ShoppingCart = new GenericRepository<ShoppingCartItem>(_context);
     }
     #endregion
 

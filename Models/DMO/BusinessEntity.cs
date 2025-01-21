@@ -29,6 +29,8 @@ public partial class BusinessEntity
 
     public virtual Person? Person { get; set; }
 
+    public virtual ICollection<ShoppingCartItem> ShoppingCartItems { get; set; } = new List<ShoppingCartItem>();
+
     public virtual Store? Store { get; set; }
 
     public virtual Vendor? Vendor { get; set; }

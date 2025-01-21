@@ -30,4 +30,18 @@ public static class Token
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
+
+
+    public static int GetBusinessEntityId(ClaimsPrincipal user)
+    {
+        var claimsIdentity = user.Identity as ClaimsIdentity;
+        var userIdClaim = claimsIdentity?.FindFirst("BusinessEntityId");
+
+        if (userIdClaim == null)
+        {
+            throw new UnauthorizedAccessException("Authentication failed. BusinessEntityId not found in token.");
+        }
+
+        return int.Parse(userIdClaim.Value);
+    }
 }

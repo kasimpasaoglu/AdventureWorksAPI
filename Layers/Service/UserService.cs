@@ -7,7 +7,7 @@ public interface IUserService
     List<AddressTypeDTO> GetAddressTypes();
     Task<LoginResult> ValidateUserAsync(Login login);
     Task<bool> DeleteUserAsync(int businessEntityId);
-    Task<bool> UpdateUserAsync(UpdateUserDTO dto);
+    Task<bool> UpdateUserAsync(UpdateUserDTO dto, int businessEntityId);
 
 }
 
@@ -209,7 +209,6 @@ public class UserService : IUserService
         {
             IsSuccessful = true,
             Message = "Login successful.",
-            BusinessEntityId = businessEntityId,
             Token = token
         };
         #endregion
@@ -295,7 +294,7 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<bool> UpdateUserAsync(UpdateUserDTO dto)
+    public async Task<bool> UpdateUserAsync(UpdateUserDTO dto, int bussinessEntityId)
     {
         using var transaction = await _unitOfWork.BeginTransactionAsync();
 
@@ -303,7 +302,7 @@ public class UserService : IUserService
         {
             #region  1. BusinessEntity doğrulaması
             var businessEntity = await _unitOfWork.BusinessEntity.FindSingle<BusinessEntity>(
-                x => x.BusinessEntityId == dto.BusinessEntityId
+                x => x.BusinessEntityId == bussinessEntityId
             );
 
             if (businessEntity == null)
@@ -314,7 +313,7 @@ public class UserService : IUserService
 
             #region  2. Person güncellemesi
             var person = await _unitOfWork.Person.FindSingle<Person>(
-                x => x.BusinessEntityId == dto.BusinessEntityId
+                x => x.BusinessEntityId == bussinessEntityId
             );
 
             if (person != null)
@@ -331,7 +330,7 @@ public class UserService : IUserService
 
             #region 3. EmailAddress güncellemesi
             var email = await _unitOfWork.EmailAddress.FindSingle<EmailAddress>(
-                x => x.BusinessEntityId == dto.BusinessEntityId
+                x => x.BusinessEntityId == bussinessEntityId
             );
 
             if (email != null && dto.EmailAddress1 != null)
@@ -345,7 +344,7 @@ public class UserService : IUserService
             if (!string.IsNullOrEmpty(dto.Password))
             {
                 var password = await _unitOfWork.Password.FindSingle<Password>(
-                    x => x.BusinessEntityId == dto.BusinessEntityId
+                    x => x.BusinessEntityId == bussinessEntityId
                 );
 
                 if (password != null)
@@ -362,7 +361,7 @@ public class UserService : IUserService
 
             #region 5. Address güncellemesi
             var businessEntityAddress = await _unitOfWork.BusinessEntityAddress.FindSingle<BusinessEntityAddress>(
-                x => x.BusinessEntityId == dto.BusinessEntityId
+                x => x.BusinessEntityId == bussinessEntityId
             );
 
             if (businessEntityAddress != null)
