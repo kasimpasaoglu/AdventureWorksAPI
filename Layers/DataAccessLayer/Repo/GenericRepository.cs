@@ -12,7 +12,7 @@ public interface IGenericRepository<T> where T : class
     Task<TResult> FindSingle<TResult>
     (
         Expression<Func<T, bool>> predicate,
-        Expression<Func<T, TResult>> selector,
+        Expression<Func<T, TResult>> selector = null,
         string[] includeProperties = null
     );
     Task<List<TResult>> FindWithProjection<TResult>
@@ -57,7 +57,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public async Task<TResult> FindSingle<TResult>
     (
         Expression<Func<T, bool>> predicate,
-        Expression<Func<T, TResult>> selector,
+        Expression<Func<T, TResult>> selector = null,
         string[] includeProperties = null
     )
     {
@@ -68,6 +68,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
             {
                 query = query.Include(includeProperty);
             }
+        }
+        if (selector == null)
+        {
+            selector = x => (TResult)(object)x;
         }
 
         return await query.Where(predicate).Select(selector).FirstOrDefaultAsync();

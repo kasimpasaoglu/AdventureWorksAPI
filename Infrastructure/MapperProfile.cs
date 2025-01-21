@@ -27,6 +27,7 @@ public class MapperProfile : Profile
         CreateMap<RegisterDTO, RegisterVM>().ReverseMap();
         CreateMap<StateDTO, StateVM>().ReverseMap();
         CreateMap<AddressTypeDTO, AddressTypeVM>().ReverseMap();
+        CreateMap<UpdateUserDTO, UpdateUserVM>().ReverseMap();
         #endregion
 
 

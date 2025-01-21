@@ -31,11 +31,11 @@ public class UserController : ControllerBase
     /// <response code="200">User registered successfully.</response>
     /// <response code="400">Validation failed or input data is invalid.</response>
     /// <response code="500">An internal server error occurred while processing the request.</response>
-    [HttpPost("Register")]
+    [HttpPut]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Register([FromBody] RegisterVM model)
+    public async Task<IActionResult> Put([FromBody] RegisterVM model)
     {
         var dto = _mapper.Map<RegisterDTO>(model);
         try
@@ -166,12 +166,10 @@ public class UserController : ControllerBase
             var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
             var userIdClaim = claimsIdentity?.FindFirst("BusinessEntityId");
 
-            if (userIdClaim == null)
+            if (userIdClaim == null || int.Parse(userIdClaim.Value) != id)
             {
                 return Unauthorized(new { Error = "User can only delete owned account. Identification failed" });
             }
-
-            var businessEntityId = int.Parse(userIdClaim.Value);
 
             var result = await _userService.DeleteUserAsync(id);
 
@@ -189,5 +187,57 @@ public class UserController : ControllerBase
 
     }
 
+    /// <summary>
+    /// Updates the details of the authenticated user.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint allows an authenticated user to update their account details. 
+    /// The user can only update their own account, determined by the `BusinessEntityId` extracted from the token.
+    /// - If the `BusinessEntityId` in the request does not match the authenticated user's ID, the operation will be unauthorized.
+    /// - Null fields in the request body will be ignored and not updated.
+    ///
+    /// Possible Responses:
+    /// - 200 OK: Returns a success message if the update is successful.
+    /// - 400 Bad Request: If the update operation fails due to invalid input.
+    /// - 401 Unauthorized: If the user is not authenticated or attempts to update another account.
+    /// - 404 Not Found: If the user does not exist.
+    /// - 500 Internal Server Error: For unexpected server errors.
+    ///
+    /// </remarks>
+    /// <param name="userVM">The update details for the user, containing fields to be updated.</param>
+    /// <returns>A response indicating the success or failure of the operation.</returns>
+    [Authorize]
+    [HttpPatch]
+    public async Task<IActionResult> Update(UpdateUserVM userVM)
+    {
+        try
+        {
+            var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
+            var userIdClaim = claimsIdentity?.FindFirst("BusinessEntityId");
 
+            if (userIdClaim == null || int.Parse(userIdClaim.Value) != userVM.BusinessEntityId)
+            {
+                return Unauthorized(new { Error = "User can only delete owned account. Identification failed" });
+            }
+
+            var dto = _mapper.Map<UpdateUserDTO>(userVM);
+            var isUpdated = await _userService.UpdateUserAsync(dto);
+
+            if (isUpdated)
+            {
+                return Ok(new { Message = "User updated successfully." });
+            }
+            return BadRequest(new { Error = "User update failed. Please check the input data." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            // kullanici kaynakli hatalar
+            return NotFound(new { Error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            // beklenmeyen hatalar
+            return StatusCode(500, new { Error = "An unexpected error occurred while updating the user.", Details = ex.Message });
+        }
+    }
 }

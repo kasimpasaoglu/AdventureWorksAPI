@@ -7,6 +7,8 @@ public interface IUserService
     List<AddressTypeDTO> GetAddressTypes();
     Task<LoginResult> ValidateUserAsync(Login login);
     Task<bool> DeleteUserAsync(int businessEntityId);
+    Task<bool> UpdateUserAsync(UpdateUserDTO dto);
+
 }
 
 public class UserService : IUserService
@@ -232,10 +234,7 @@ public class UserService : IUserService
         try
         {
             #region 1- Email Adresi kaydini sil
-            var email = await _unitOfWork.EmailAddress.FindSingle(
-                x => x.BusinessEntityId == businessEntityId,
-                selector: x => x
-            );
+            var email = await _unitOfWork.EmailAddress.FindSingle<EmailAddress>(x => x.BusinessEntityId == businessEntityId);
             if (email != null)
             {
                 await _unitOfWork.EmailAddress.RemoveAsync(email);
@@ -243,10 +242,7 @@ public class UserService : IUserService
             #endregion
 
             #region 2-Password kaydini sil
-            var pasword = await _unitOfWork.Password.FindSingle(
-                x => x.BusinessEntityId == businessEntityId,
-                selector: x => x
-            );
+            var pasword = await _unitOfWork.Password.FindSingle<Password>(x => x.BusinessEntityId == businessEntityId);
 
             if (pasword != null)
             {
@@ -255,17 +251,13 @@ public class UserService : IUserService
             #endregion
 
             #region 3-Address ve BusinessEntityAddress kayitlarini sil
-            var businessEntityAddress = await _unitOfWork.BusinessEntityAddress.FindSingle(
-                x => x.BusinessEntityId == businessEntityId,
-                selector: x => x
-            ); // businessentityaddress tablosundaki silinecek deger
+            var businessEntityAddress = await _unitOfWork.BusinessEntityAddress.FindSingle<BusinessEntityAddress>(x => x.BusinessEntityId == businessEntityId);
+            // businessentityaddress tablosundaki silinecek deger
 
             if (businessEntityAddress != null)
             {
-                var address = await _unitOfWork.Address.FindSingle(
-                    x => x.AddressId == businessEntityAddress.AddressId,
-                    selector: x => x
-                ); // Address tablosundaki silecenek deger
+                var address = await _unitOfWork.Address.FindSingle<Address>(x => x.AddressId == businessEntityAddress.AddressId);
+                // Address tablosundaki silecenek deger
 
                 // 1 once businessEntityAdress kalmasi gerekiyor
                 await _unitOfWork.BusinessEntityAddress.RemoveAsync(businessEntityAddress);
@@ -280,10 +272,7 @@ public class UserService : IUserService
             #endregion
 
             #region 4. Person kaydini sil
-            var person = await _unitOfWork.Person.FindSingle(
-                x => x.BusinessEntityId == businessEntityId,
-                selector: x => x
-            );
+            var person = await _unitOfWork.Person.FindSingle<Person>(x => x.BusinessEntityId == businessEntityId);
 
             if (person != null)
             {
@@ -303,6 +292,113 @@ public class UserService : IUserService
         {
             await _unitOfWork.RollbackTransactionAsync();
             return false;
+        }
+    }
+
+    public async Task<bool> UpdateUserAsync(UpdateUserDTO dto)
+    {
+        using var transaction = await _unitOfWork.BeginTransactionAsync();
+
+        try
+        {
+            #region  1. BusinessEntity doğrulaması
+            var businessEntity = await _unitOfWork.BusinessEntity.FindSingle<BusinessEntity>(
+                x => x.BusinessEntityId == dto.BusinessEntityId
+            );
+
+            if (businessEntity == null)
+            {
+                throw new InvalidOperationException("User not found with the provided BusinessEntityId.");
+            }
+            #endregion
+
+            #region  2. Person güncellemesi
+            var person = await _unitOfWork.Person.FindSingle<Person>(
+                x => x.BusinessEntityId == dto.BusinessEntityId
+            );
+
+            if (person != null)
+            {
+                if (dto.Title != null) person.Title = dto.Title;
+                if (dto.FirstName != null) person.FirstName = dto.FirstName;
+                if (dto.MiddleName != null) person.MiddleName = dto.MiddleName;
+                if (dto.LastName != null) person.LastName = dto.LastName;
+                if (dto.EmailPromotion.HasValue) person.EmailPromotion = dto.EmailPromotion.Value;
+
+                await _unitOfWork.Person.UpdateAsync(person);
+            }
+            #endregion
+
+            #region 3. EmailAddress güncellemesi
+            var email = await _unitOfWork.EmailAddress.FindSingle<EmailAddress>(
+                x => x.BusinessEntityId == dto.BusinessEntityId
+            );
+
+            if (email != null && dto.EmailAddress1 != null)
+            {
+                email.EmailAddress1 = dto.EmailAddress1;
+                await _unitOfWork.EmailAddress.UpdateAsync(email);
+            }
+            #endregion
+
+            #region 4. Password güncellemesi
+            if (!string.IsNullOrEmpty(dto.Password))
+            {
+                var password = await _unitOfWork.Password.FindSingle<Password>(
+                    x => x.BusinessEntityId == dto.BusinessEntityId
+                );
+
+                if (password != null)
+                {
+                    var salt = EncryptHelper.GenerateSalt();
+                    var hashedPassword = EncryptHelper.HashPassword(dto.Password, salt);
+
+                    password.PasswordHash = hashedPassword;
+                    password.PasswordSalt = salt;
+                    await _unitOfWork.Password.UpdateAsync(password);
+                }
+            }
+            #endregion
+
+            #region 5. Address güncellemesi
+            var businessEntityAddress = await _unitOfWork.BusinessEntityAddress.FindSingle<BusinessEntityAddress>(
+                x => x.BusinessEntityId == dto.BusinessEntityId
+            );
+
+            if (businessEntityAddress != null)
+            {
+                var address = await _unitOfWork.Address.FindSingle<Address>(
+                    x => x.AddressId == businessEntityAddress.AddressId
+                );
+
+                if (address != null)
+                {
+                    if (dto.AddressLine1 != null) address.AddressLine1 = dto.AddressLine1;
+                    if (dto.AddressLine2 != null) address.AddressLine2 = dto.AddressLine2;
+                    if (dto.City != null) address.City = dto.City;
+                    if (dto.StateProvinceId.HasValue) address.StateProvinceId = dto.StateProvinceId.Value;
+                    if (dto.PostalCode != null) address.PostalCode = dto.PostalCode;
+
+                    await _unitOfWork.Address.UpdateAsync(address);
+                }
+
+                if (dto.AddressTypeId.HasValue)
+                {
+                    businessEntityAddress.AddressTypeId = dto.AddressTypeId.Value;
+                    await _unitOfWork.BusinessEntityAddress.UpdateAsync(businessEntityAddress);
+                }
+            }
+            #endregion
+
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitTransactionAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackTransactionAsync();
+            throw new InvalidOperationException("An error occurred while updating the user. See inner exception for details.", ex);
         }
     }
 }

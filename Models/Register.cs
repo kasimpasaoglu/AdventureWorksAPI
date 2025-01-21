@@ -7,8 +7,8 @@ public class RegisterDTO
     public string? MiddleName { get; set; }
     required public string LastName { get; set; }
     required public string EmailAddress1 { get; set; }
-    required public string Password { get; set; } // pasworld hashlenecek
-    required public string PasswordSalt { get; set; } // salt kullanilacak
+    required public string Password { get; set; }
+    required public string PasswordSalt { get; set; }
     public int EmailPromotion { get; set; }
     required public int AddressTypeId { get; set; }
     required public string AddressLine1 { get; set; }
