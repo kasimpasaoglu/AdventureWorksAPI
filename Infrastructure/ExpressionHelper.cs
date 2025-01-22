@@ -26,7 +26,8 @@ public static class ExpressionHelper
             {
                 var subcategoryIdProperty = Expression.Property(parameter, "ProductSubcategoryId");
                 var subcategoryIdValue = Expression.Constant(filter.ProductSubcategoryId.Value);
-                var subcategoryCondition = Expression.Equal(subcategoryIdProperty, subcategoryIdValue);
+                var convertedSubcategoryIdProperty = Expression.Convert(subcategoryIdProperty, typeof(int));
+                var subcategoryCondition = Expression.Equal(convertedSubcategoryIdProperty, subcategoryIdValue);
                 combinedExp = Expression.AndAlso(combinedExp, subcategoryCondition);
             }
         }

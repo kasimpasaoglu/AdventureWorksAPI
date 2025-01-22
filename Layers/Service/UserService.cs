@@ -8,6 +8,7 @@ public interface IUserService
     Task<LoginResult> ValidateUserAsync(Login login);
     Task<bool> DeleteUserAsync(int businessEntityId);
     Task<bool> UpdateUserAsync(UpdateUserDTO dto, int businessEntityId);
+    Task<UpdateUserDTO> GetUserInfo(int bussinessEntityId);
 
 }
 
@@ -399,5 +400,36 @@ public class UserService : IUserService
             await _unitOfWork.RollbackTransactionAsync();
             throw new InvalidOperationException("An error occurred while updating the user. See inner exception for details.", ex);
         }
+    }
+
+    public async Task<UpdateUserDTO> GetUserInfo(int bussinessEntityId)
+    {
+        var businessEntity = await _unitOfWork.BusinessEntity.FindSingle<BusinessEntity>(
+            x => x.BusinessEntityId == bussinessEntityId)
+            ?? throw new InvalidOperationException("User not found on table BusinessEntity");
+
+        var person = await _unitOfWork.Person.FindSingle<Person>(x => x.BusinessEntityId == bussinessEntityId) ?? throw new InvalidOperationException("User not found on table Person");
+
+        var email = await _unitOfWork.EmailAddress.FindSingle<EmailAddress>(x => x.BusinessEntityId == bussinessEntityId) ?? throw new InvalidOperationException("User not found on table EmailAddress");
+
+        var businessEntityAddress = await _unitOfWork.BusinessEntityAddress.FindSingle<BusinessEntityAddress>(x => x.BusinessEntityId == bussinessEntityId) ?? throw new InvalidOperationException("User not found in table BusinessEntityAddress");
+
+        var address = await _unitOfWork.Address.FindSingle<Address>(x => x.AddressId == businessEntityAddress.AddressId) ?? throw new InvalidOperationException("User not found in table Address");
+
+        return new UpdateUserDTO()
+        {
+            Title = person.Title,
+            FirstName = person.FirstName,
+            MiddleName = person.MiddleName,
+            LastName = person.LastName,
+            EmailAddress1 = email.EmailAddress1,
+            EmailPromotion = person.EmailPromotion,
+            AddressTypeId = businessEntityAddress.AddressTypeId,
+            AddressLine1 = address.AddressLine1,
+            AddressLine2 = address.AddressLine2,
+            City = address.City,
+            StateProvinceId = address.StateProvinceId,
+            PostalCode = address.PostalCode,
+        };
     }
 }

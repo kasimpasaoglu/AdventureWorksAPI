@@ -55,65 +55,82 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves a list of all states (StateProvince) with their IDs and names.
+    /// Retrieves a list of constants for user registration.
     /// </summary>
     /// <remarks>
-    /// This endpoint fetches all states from the database and returns their unique identifiers (StateProvinceId) and names. 
-    /// The data is primarily used for populating dropdowns or selection fields in the user registration process.
-    /// 
-    /// Example request:
-    ///
+    /// **Responses:**
+    /// - `200 OK` : Both `States` and `AddressTypes` are fully populated.
+    /// - `206 Partial Content` : One of the lists (`States` or `AddressTypes`) is empty, or both.
+    /// - `204 No Content` : Both `States` and `AddressTypes` are empty.
     /// </remarks>
-    /// <returns>
-    /// Returns a list of states in a `StateVM` format if any exist. 
-    /// If no states are found, returns a 404 Not Found response.
-    /// </returns>
-    /// <response code="200">Returns the list of states with their IDs and names.</response>
-    /// <response code="404">No states found in the database.</response>
-    [HttpGet("States")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<StateVM>))]
+    /// <returns>A list of constants for user registration.</returns>
+    [HttpGet("Constants")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AddressConstants))]
+    [ProducesResponseType(StatusCodes.Status206PartialContent, Type = typeof(AddressConstants))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetStates()
+    public IActionResult GetConstants()
     {
-        var dtoList = _userService.GetAllStates();
-        if (dtoList.Count > 0)
+        var answer = new AddressConstants();
+        var statesDto = _userService.GetAllStates();
+        if (statesDto.Count > 0)
         {
-            return Ok(_mapper.Map<List<StateVM>>(dtoList));
+            answer.States = _mapper.Map<List<StateVM>>(statesDto);
+        }
+        var typesDto = _userService.GetAddressTypes();
+        if (typesDto.Count > 0)
+        {
+            answer.AddressTypes = _mapper.Map<List<AddressTypeVM>>(typesDto);
+        }
+
+        if (answer.States.Count > 0 && answer.AddressTypes.Count > 0)
+        {
+            return Ok(answer);
+        }
+        else if (answer.States.Count > 0 || answer.AddressTypes.Count > 0)
+        {
+            return StatusCode(StatusCodes.Status206PartialContent, answer);
         }
         else
         {
-            return NotFound();
+            return NoContent();
         }
+
     }
 
     /// <summary>
-    /// Retrieves a list of all address types with their IDs and names.
+    /// Retrieves the user information for the **authenticated** user.
     /// </summary>
     /// <remarks>
-    /// This endpoint fetches all address types from the database and returns their unique identifiers (`AddressTypeId`) and names. 
-    /// The data is used for populating dropdowns or selection fields during user registration, allowing the user to select the type of address (e.g., Home, Billing, Shipping).
-    /// 
+    /// **!!Does not returns Password info**
+    /// **Responses:**
+    /// - `200 OK` : Returns the user information.
+    /// - `404 Not Found` : If the user is not found.
+    /// - `500 Internal Server Error` : If an unexpected error occurs.
     /// </remarks>
-    /// <returns>
-    /// Returns a list of address types in `AddressTypeVM` format if any exist. 
-    /// If no address types are found, returns a 404 Not Found response.
-    /// </returns>
-    /// <response code="200">Returns the list of address types with their IDs and names.</response>
-    /// <response code="404">No address types found in the database.</response>
-    [HttpGet("AddressTypes")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AddressTypeVM>))]
+    [Authorize]
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UpdateUserVM))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetAddressTypes()
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Get()
     {
-        var dtoList = _userService.GetAddressTypes();
-        if (dtoList.Count > 0)
+        var businessEntityId = Token.GetBusinessEntityId(User);
+        var infoDTO = new UpdateUserDTO();
+        try
         {
-            return Ok(_mapper.Map<List<AddressTypeVM>>(dtoList));
+            infoDTO = await _userService.GetUserInfo(businessEntityId);
         }
-        else
+        catch (InvalidOperationException ex)
         {
-            return NotFound();
+
+            return NotFound(new { message = ex.Message });
         }
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+        }
+        return Ok(_mapper.Map<UpdateUserVM>(infoDTO));
     }
 
     /// <summary>

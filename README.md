@@ -10,7 +10,7 @@ This project is a **Web API** application developed for an demo e-commerce platf
 
 - Developed using **C#** and **.NET 9.0**.
 - **Entity Framework Core** for database operations.
-- Follows **RESTful API** principles.
+- Follows **RESTful API** principles with **Repository Desing Pattern** rules.
 - Works with the **[AdventureWorks](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver16&tabs=ssms) MsSQL** database. *(With some customizations)*
 - Designed with **Dependency Injection (DI)** for flexibility.
 
@@ -29,17 +29,17 @@ This project is a **Web API** application developed for an demo e-commerce platf
 ### User Management
 
 - **PUT /api/user**: Creates a new user.
-- **POST /api/user**: Logs in a user.
-- **DELETE /api/user**: Deletes a user account.
-- **PATCH /api/user**: Updates user information.
-- **GET /api/user/states**: Retrieves the list of all available countries & states.
-- **GET /api/user/addresstype**: Retrieves the list of all available address types.
+- **POST /api/user**: Validates a user login attempt and returns JWT Token if success.
+- **DELETE /api/user**: Deletes **authenticated** user account.
+- **PATCH /api/user**: Updates **authenticated** user information.
+- **GET /api/user**: Retrieves the user information for the **authenticated** user
+- **GET /api/user/constants**: Retrieves the list of all available countries & states and address types.
 
 ### Product Management
 
 - **GET /api/product/{id}**: Retrieves a specific product.
 - **GET /api/product/recent**: Retrieves recently added products.
-- **POST /api/product**: Retrieves a list of products based on given filters.
+- **GET /api/product**: Retrieves a list of products based on given filters.
 
 ### Color Menagement
 
@@ -48,13 +48,13 @@ This project is a **Web API** application developed for an demo e-commerce platf
 ### Category Management
 
 - **GET /api/category**: Retrieves all categories.
-- **GET /api/category/{id}**: Retrieves subcategories of a specific category.
+- **GET /api/category/{id}**: Retrieves subcategories of a specific categoryId.
 
 ### Cart Operations
 
-- **GET /api/cart**: Lists the user's cart.
-- **PUT /api/cart**: Adds a product to the cart.
-- **DELETE /api/cart**: Removes a product from the cart.
+- **GET /api/cart**: Lists the **authenticated** user's cart.
+- **PUT /api/cart**: Adds a product to the cart for **authenticated** user.
+- **DELETE /api/cart**: Removes a product from the cart for **authenticated** user.
 
 ---
 

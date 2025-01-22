@@ -35,7 +35,6 @@ public class CartController : ControllerBase
     /// <response code="200">Returns the shopping cart details and items.</response>
     /// <response code="204">No content available, cart is empty.</response>
     /// <response code="500">Unexpected server error occurred.</response>
-
     [Authorize]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ShoppingCartVM))]
