@@ -38,11 +38,11 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public IActionResult Post([FromQuery] ProductFilterModel filter)
+    public IActionResult Get([FromQuery] ProductFilterModel filter)
     {
-        if (filter.SelectedColors.Count == 1 && filter.SelectedColors[0].Contains(','))
+        if (filter.SelectedColors != null && filter.SelectedColors.Count > 0 && filter.SelectedColors[0].Contains(','))
         {
-            filter.SelectedColors = filter.SelectedColors[0].Split(',').ToList();
+            filter.SelectedColors = [.. filter.SelectedColors[0].Split(',')];
         }
         var answer = _service.GetProducts(filter);
         var productList = _mapper.Map<List<ProductVM>>(answer);
