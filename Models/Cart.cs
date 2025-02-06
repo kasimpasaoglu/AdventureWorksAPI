@@ -26,6 +26,7 @@ public class ShoppingCartVM
 
     public class ItemVM
     {
+        public int ProductId { get; set; }
         public string ProductName { get; set; }
         public byte[]? LargePhoto { get; set; }
         public int Quantity { get; set; }
