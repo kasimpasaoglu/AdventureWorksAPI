@@ -104,7 +104,7 @@ public class CartService : ICartService
                 Details = new Summary()
                 {
                     TotalPrice = cartItems.Sum(item => item.TotalPrice),
-                    ItemCount = cartItems.Count
+                    ItemCount = cartItems.Sum(item => item.Quantity)
                 },
                 Items = cartItems
             };
