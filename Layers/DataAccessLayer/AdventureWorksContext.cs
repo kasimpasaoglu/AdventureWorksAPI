@@ -195,7 +195,20 @@ public partial class AdventureWorksContext : DbContext
     public virtual DbSet<WorkOrderRouting> WorkOrderRoutings { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Name=DefaultConnection");
+    {
+        if (!optionsBuilder.IsConfigured) // Eğer connection string atanmadıysa, elle yükle
+        {
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("Connection string is null in OnConfiguring!");
+            }
+
+            optionsBuilder.UseSqlServer(connectionString);
+        }
+    }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
