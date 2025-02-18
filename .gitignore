@@ -4,3 +4,4 @@
 /publish/runtimes
 /publis/wwwroot
 /publish/*.*
+.env
